@@ -43,10 +43,9 @@
     "homepage": "https://ytdl.snowflakedev.xyz",
     "dependencies": {
         "prism-media": "^1.2.2",
-        "ytdl-core": "^3.3.0"
+        "ytdl-core": "^3.4.0"
     },
     "devDependencies": {
-        "ffmpeg-static": "^4.2.6",
-        "node-opus": "^0.3.2"
+        "@discordjs/opus": "^0.3.2"
     }
 }
