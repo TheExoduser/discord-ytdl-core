@@ -3,16 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 const ytdl_core_1 = __importDefault(require("ytdl-core"));
-const prism_media_1 = __importDefault(require("prism-media"));
+const prism_media_1 = require("prism-media");
 ;
 ;
-const forwardEvent = (src, dest, event) => {
-    dest.on('newListener', (eventName, listener) => {
-        if ((Array.isArray(event) && event.includes(eventName)) || event == eventName)
-            src.on(eventName, listener);
-    });
-    dest.on('removeListener', (eventName, listener) => src.removeListener(eventName, listener));
-};
 /**
   * Create an opus stream for your video with provided encoder args
   * @param url - YouTube URL of the video
@@ -47,27 +40,25 @@ const StreamDownloader = (url, options) => {
     if (options && options.encoderArgs && Array.isArray(options.encoderArgs)) {
         FFmpegArgs = FFmpegArgs.concat(options.encoderArgs);
     }
-    const transcoder = new prism_media_1.default.FFmpeg({
+    const transcoder = new prism_media_1.FFmpeg({
         args: FFmpegArgs
     });
     const inputStream = ytdl_core_1.default(url, options);
     const output = inputStream.pipe(transcoder);
-    inputStream.on("error", e => output.destroy(e));
     if (options && !options.opusEncoded) {
-        forwardEvent(inputStream, output, ["info", "progress"]);
+        inputStream.on("error", e => output.destroy(e));
         output.on("close", () => transcoder.destroy());
         return output;
     }
     ;
-    const opus = new prism_media_1.default.opus.Encoder({
+    const opus = new prism_media_1.opus.Encoder({
         rate: 48000,
         channels: 2,
         frameSize: 960
     });
     const outputStream = output.pipe(opus);
-    forwardEvent(inputStream, outputStream, ["info", "progress"]);
-    output.on("error", e => outputStream.destroy(e));
-    outputStream.on('close', () => {
+    inputStream.on("error", (e) => outputStream.destroy(e));
+    outputStream.on("close", () => {
         transcoder.destroy();
         opus.destroy();
     });
@@ -75,11 +66,11 @@ const StreamDownloader = (url, options) => {
 };
 /**
  * Creates arbitraryStream
- * @param {String|Duplex|Readable} stream Any readable stream source
- * @param {StreamOptions} options Stream options
+ * @param stream Any readable stream source
+ * @param options Stream options
  * @example const streamSource = "https://listen.moe/kpop/opus";
  * let stream = ytdl.arbitraryStream(streamSource, {
- *     encoderArgs: ["asetrate=44100*1.25"],
+ *     encoderArgs: ["-af", "asetrate=44100*1.25"],
  *     fmt: "mp3"
  * });
  *
@@ -118,7 +109,7 @@ const arbitraryStream = (stream, options) => {
     if (options && options.encoderArgs && Array.isArray(options.encoderArgs)) {
         FFmpegArgs = FFmpegArgs.concat(options.encoderArgs);
     }
-    let transcoder = new prism_media_1.default.FFmpeg({
+    let transcoder = new prism_media_1.FFmpeg({
         args: FFmpegArgs
     });
     if (typeof stream !== "string") {
@@ -130,14 +121,13 @@ const arbitraryStream = (stream, options) => {
         return transcoder;
     }
     ;
-    const opus = new prism_media_1.default.opus.Encoder({
+    const opus = new prism_media_1.opus.Encoder({
         rate: 48000,
         channels: 2,
         frameSize: 960
     });
     const outputStream = transcoder.pipe(opus);
-    transcoder.on("error", e => outputStream.destroy(e));
-    outputStream.on('close', () => {
+    outputStream.on("close", () => {
         transcoder.destroy();
         opus.destroy();
     });
