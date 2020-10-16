@@ -46,6 +46,7 @@
         "ytdl-core": "^3.4.0"
     },
     "devDependencies": {
-        "@discordjs/opus": "^0.3.2"
+        "@discordjs/opus": "^0.3.2",
+        "@types/node": "^14.11.8"
     }
 }

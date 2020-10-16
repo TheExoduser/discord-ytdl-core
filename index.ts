@@ -1,41 +1,19 @@
 import ytdl, { downloadOptions } from "ytdl-core";
-import prism from "prism-media";
+import { opus as Opus, FFmpeg } from "prism-media";
 import { Readable, Duplex } from "stream";
 
-/**
- * Stream Options
- * @param {Number} seek Time in seconds to seek
- * @param {Array} encoderArgs Args provided to transcoder
- * @param {String} fmt Output format.
- * @param {Boolean} opusEncoded It should return opus encoded stream?
- */
 interface YTDLStreamOptions extends downloadOptions {
     seek?: number;
-    encoderArgs?: any[];
+    encoderArgs?: string[];
     fmt?: string;
     opusEncoded?: boolean;
 };
 
-/**
- * Stream Options
- * @param {Number} seek Time in seconds to seek
- * @param {Array} encoderArgs Args provided to transcoder
- * @param {String} fmt Output format.
- * @param {Boolean} opusEncoded It should return opus encoded stream?
- */
 interface StreamOptions {
     seek?: number;
-    encoderArgs?: any[];
+    encoderArgs?: string[];
     fmt?: string;
     opusEncoded?: boolean;
-};
-
-const forwardEvent = (src: Readable, dest: Readable, event: string | string[]) => {
-    dest.on('newListener', (eventName, listener) => {
-        if ((Array.isArray(event) && event.includes(eventName)) || event == eventName)
-            src.on(eventName, listener)
-    });
-    dest.on('removeListener', (eventName, listener) => src.removeListener(eventName, listener));
 };
 
 /**
@@ -76,28 +54,26 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
         FFmpegArgs = FFmpegArgs.concat(options.encoderArgs);
     }
 
-    const transcoder = new prism.FFmpeg({
+    const transcoder = new FFmpeg({
         args: FFmpegArgs
     });
 
     const inputStream = ytdl(url, options);
     const output = inputStream.pipe(transcoder);
-    inputStream.on("error", e => output.destroy(e));
     if (options && !options.opusEncoded) {
-        forwardEvent(inputStream, output, ["info", "progress"]);
+        inputStream.on("error", e => output.destroy(e));
         output.on("close", () => transcoder.destroy());
         return output;
     };
-    const opus = new prism.opus.Encoder({
+    const opus = new Opus.Encoder({
         rate: 48000,
         channels: 2,
         frameSize: 960
     });
 
     const outputStream = output.pipe(opus);
-    forwardEvent(inputStream, outputStream, ["info", "progress"]);
-    output.on("error", e => outputStream.destroy(e));
-    outputStream.on('close', () => {
+    inputStream.on("error", (e) => outputStream.destroy(e));
+    outputStream.on("close", () => {
         transcoder.destroy();
         opus.destroy();
     });
@@ -106,11 +82,11 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
 
 /**
  * Creates arbitraryStream
- * @param {String|Duplex|Readable} stream Any readable stream source
- * @param {StreamOptions} options Stream options
+ * @param stream Any readable stream source
+ * @param options Stream options
  * @example const streamSource = "https://listen.moe/kpop/opus";
  * let stream = ytdl.arbitraryStream(streamSource, {
- *     encoderArgs: ["asetrate=44100*1.25"],
+ *     encoderArgs: ["-af", "asetrate=44100*1.25"],
  *     fmt: "mp3"
  * });
  * 
@@ -152,7 +128,7 @@ const arbitraryStream = (stream: string | Readable | Duplex, options: StreamOpti
         FFmpegArgs = FFmpegArgs.concat(options.encoderArgs);
     }
 
-    let transcoder = new prism.FFmpeg({
+    let transcoder = new FFmpeg({
         args: FFmpegArgs
     });
     if (typeof stream !== "string") {
@@ -163,15 +139,14 @@ const arbitraryStream = (stream: string | Readable | Duplex, options: StreamOpti
         transcoder.on("close", () => transcoder.destroy());
         return transcoder;
     };
-    const opus = new prism.opus.Encoder({
+    const opus = new Opus.Encoder({
         rate: 48000,
         channels: 2,
         frameSize: 960
     });
 
     const outputStream = transcoder.pipe(opus);
-    transcoder.on("error", e => outputStream.destroy(e));
-    outputStream.on('close', () => {
+    outputStream.on("close", () => {
         transcoder.destroy();
         opus.destroy();
     });
