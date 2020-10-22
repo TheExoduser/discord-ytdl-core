@@ -1,5 +1,8 @@
-# [discord-ytdl-core](https://ytdl.snowflakedev.xyz "Documentation")
+# Forked [discord-ytdl-core](https://ytdl.snowflakedev.xyz "Documentation")
+
 Simple ytdl wrapper for discord bots with custom ffmpeg args support.
+
+*[Original version](https://www.npmjs.com/package/discord-ytdl-core)*
 
 # Documentation
 **[Discord YTDL Core](https://ytdl.snowflakedev.xyz "Discord YTDL Core")**
@@ -7,16 +10,16 @@ Simple ytdl wrapper for discord bots with custom ffmpeg args support.
 # Installing
 
 ```sh
-npm i discord-ytdl-core
+npm i @skick/discord-ytdl-core
 ```
 
-[https://www.npmjs.com/package/discord-ytdl-core](https://www.npmjs.com/package/discord-ytdl-core)
+[https://www.npmjs.com/package/@skick/discord-ytdl-core](https://www.npmjs.com/package/@skick/discord-ytdl-core)
 
 # Opus [optional]
 > Please install opus engine if you want to encode the stream to opus format.
 
 ## **Supported Opus Engines**
-- **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)**
+- **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)** *(Recommended)*
 - **[node-opus](https://npmjs.com/package/node-opus)**
 - **[opusscript](https://npmjs.com/package/opusscript)**
 
