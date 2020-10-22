@@ -40,7 +40,7 @@
     "homepage": "https://ytdl.snowflakedev.xyz",
     "dependencies": {
         "prism-media": "^1.2.2",
-        "ytdl-core": "^3.4.1"
+        "ytdl-core": "^3.4.2"
     },
     "devDependencies": {
         "@discordjs/opus": "^0.3.2",
