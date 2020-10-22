@@ -61,7 +61,7 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
     const inputStream = ytdl(url, options);
     const output = inputStream.pipe(transcoder);
     if (options && !options.opusEncoded) {
-        inputStream.on("error", () => output.destroy());
+        inputStream.on("error", e => output.destroy(e));
         output.on("close", () => transcoder.destroy());
         return output;
     };
@@ -72,12 +72,8 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
     });
 
     const outputStream = output.pipe(opus);
+    inputStream.on("error", (e) => outputStream.destroy(e));
     outputStream.on("close", () => {
-        inputStream.on("error", () => {
-            transcoder.destroy();
-            opus.destroy();
-        });
-
         transcoder.destroy();
         opus.destroy();
     });
@@ -137,7 +133,7 @@ const arbitraryStream = (stream: string | Readable | Duplex, options: StreamOpti
     });
     if (typeof stream !== "string") {
         transcoder = stream.pipe(transcoder);
-        stream.on("error", () => transcoder.destroy());
+        stream.on("error", e => transcoder.destroy(e));
     }
     if (options && !options.opusEncoded) {
         transcoder.on("close", () => transcoder.destroy());
