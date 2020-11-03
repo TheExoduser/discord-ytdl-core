@@ -1,27 +1,22 @@
-# Forked [discord-ytdl-core](https://ytdl.snowflakedev.xyz "Documentation")
+# Forked discord-ytdl-core
 
 Simple ytdl wrapper for discord bots with custom ffmpeg args support.
 
 *[Original version](https://www.npmjs.com/package/discord-ytdl-core)*
 
-# Documentation
-**[Discord YTDL Core](https://ytdl.snowflakedev.xyz "Discord YTDL Core")**
-
 # Installing
 
 ```sh
-npm i @skick/discord-ytdl-core
+npm i @distube/ytdl
 ```
 
-[https://www.npmjs.com/package/@skick/discord-ytdl-core](https://www.npmjs.com/package/@skick/discord-ytdl-core)
+[https://www.npmjs.com/package/@distube/ytdl](https://www.npmjs.com/package/@distube/ytdl)
 
 # Opus [optional]
 > Please install opus engine if you want to encode the stream to opus format.
 
-## **Supported Opus Engines**
-- **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)** *(Recommended)*
-- **[node-opus](https://npmjs.com/package/node-opus)**
-- **[opusscript](https://npmjs.com/package/opusscript)**
+## **Recommended Opus Engines**
+- **[@discordjs/opus](https://npmjs.com/package/@discordjs/opus)**
 
 # API
 ## YTDL(youtubeURL, options)
@@ -33,6 +28,15 @@ ytdl("https://youtube.com/watch?v=ERu6jh_1gR0", {
     fmt: "mp3",
     encoderArgs: ['-af', 'bass=g=10']
 }).pipe(fs.createWritestream("bass_boosted.mp3"));
+
+ytdt.getInfo("https://www.youtube.com/watch?v=ERu6jh_1gR0")
+    .then(info => 
+        ytdl.downloadFromInfo(info, {
+            filter: "audioonly",
+            fmt: "mp3",
+            encoderArgs: ['-af', 'bass=g=10']
+        }).pipe(fs.createWritestream("bass_boosted.mp3"))
+    )
 
 ```
 

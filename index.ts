@@ -16,6 +16,8 @@ interface StreamOptions {
     opusEncoded?: boolean;
 };
 
+const ytdlEvent = ["info", "progress"];
+
 const forwardEvent = (src: Readable, dest: Readable, event: string | string[]) => {
     dest.on('newListener', (eventName, listener) => {
         if ((Array.isArray(event) && event.includes(eventName)) || event == eventName)
@@ -69,7 +71,7 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
     const inputStream = ytdl(url, options);
     const output = inputStream.pipe(transcoder);
     if (options && !options.opusEncoded) {
-        forwardEvent(inputStream, output, ["info", "progress"]);
+        forwardEvent(inputStream, output, ytdlEvent);
         inputStream.on("error", e => output.destroy(e));
         output.on("close", () => transcoder.destroy());
         return output;
@@ -81,7 +83,7 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
     });
 
     const outputStream = output.pipe(opus);
-    forwardEvent(inputStream, outputStream, ["info", "progress"]);
+    forwardEvent(inputStream, outputStream, ytdlEvent);
     inputStream.on("error", (e) => outputStream.destroy(e));
     outputStream.on("close", () => {
         transcoder.destroy();
@@ -89,6 +91,65 @@ const StreamDownloader = (url: string, options: YTDLStreamOptions) => {
     });
     return outputStream;
 };
+
+/**
+  * Create an opus stream for your video with provided encoder args
+  * @param info - YTDL full info
+  * @param options - YTDL options
+  * @example const ytdl = require("discord-ytdl-core");
+  * const stream = ytdl(info, {
+  *     seek: 3,
+  *     encoderArgs: ["-af", "bass=g=10"],
+  *     opusEncoded: true
+  * });
+  * VoiceConnection.play(stream, {
+  *     type: "opus"
+  * });
+  */
+const downloadFromInfo = (info: ytdl.videoInfo, options: YTDLStreamOptions) => {
+    let FFmpegArgs: string[] = [
+        "-analyzeduration", "0",
+        "-loglevel", "0",
+        "-f", `${options && options.fmt && typeof (options.fmt) == "string" ? options.fmt : "s16le"}`,
+        "-ar", "48000",
+        "-ac", "2"
+    ];
+
+    if (options && options.seek && !isNaN(options.seek)) {
+        FFmpegArgs.unshift("-ss", options.seek.toString());
+    }
+
+    if (options && options.encoderArgs && Array.isArray(options.encoderArgs)) {
+        FFmpegArgs = FFmpegArgs.concat(options.encoderArgs);
+    }
+
+    const transcoder = new FFmpeg({
+        args: FFmpegArgs
+    });
+
+    const inputStream = ytdl.downloadFromInfo(info, options);
+    const output = inputStream.pipe(transcoder);
+    if (options && !options.opusEncoded) {
+        forwardEvent(inputStream, output, ytdlEvent);
+        inputStream.on("error", e => output.destroy(e));
+        output.on("close", () => transcoder.destroy());
+        return output;
+    };
+    const opus = new Opus.Encoder({
+        rate: 48000,
+        channels: 2,
+        frameSize: 960
+    });
+
+    const outputStream = output.pipe(opus);
+    forwardEvent(inputStream, outputStream, ytdlEvent);
+    inputStream.on("error", (e) => outputStream.destroy(e));
+    outputStream.on("close", () => {
+        transcoder.destroy();
+        opus.destroy();
+    });
+    return outputStream;
+}
 
 /**
  * Creates arbitraryStream
@@ -165,5 +226,6 @@ const arbitraryStream = (stream: string | Readable | Duplex, options: StreamOpti
 
 StreamDownloader.arbitraryStream = arbitraryStream;
 const DiscordYTDLCore = Object.assign(StreamDownloader, ytdl);
+StreamDownloader.downloadFromInfo = downloadFromInfo;
 
 export = DiscordYTDLCore;

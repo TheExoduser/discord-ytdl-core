@@ -16,5 +16,6 @@ interface StreamOptions {
 declare const DiscordYTDLCore: {
     (url: string, options: YTDLStreamOptions): Opus.Encoder | FFmpeg;
     arbitraryStream: (stream: string | Readable | Duplex, options: StreamOptions) => Opus.Encoder | FFmpeg;
+    downloadFromInfo: (info: ytdl.videoInfo, options: YTDLStreamOptions) => Opus.Encoder | FFmpeg;
 } & typeof ytdl;
 export = DiscordYTDLCore;

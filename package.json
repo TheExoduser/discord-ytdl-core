@@ -1,7 +1,7 @@
 {
-    "name": "@skick/discord-ytdl-core",
-    "version": "4.1.0",
-    "description": "Simple ytdl wrapper for discord bots with custom ffmpeg args support.",
+    "name": "@distube/ytdl",
+    "version": "1.0.1",
+    "description": "A discord-ytdl-core fork. Made for DisTube.js.org",
     "main": "index.js",
     "types": "index.d.ts",
     "files": [
@@ -35,15 +35,18 @@
         "discord-player",
         "discord-music-player"
     ],
-    "author": "Snowflake107",
+    "author": "Skick (https://github.com/skick1234)",
+    "contributors": [
+        "Snowflake107"
+    ],
     "license": "ISC",
-    "homepage": "https://ytdl.snowflakedev.xyz",
+    "homepage": "https://distube.js.org",
     "dependencies": {
         "prism-media": "^1.2.2",
-        "ytdl-core": "^3.4.2"
+        "ytdl-core": "^4.0.2"
     },
     "devDependencies": {
-        "@discordjs/opus": "^0.3.2",
-        "@types/node": "^14.14.2"
+        "@discordjs/opus": "^0.3.3",
+        "@types/node": "^14.14.6"
     }
 }
