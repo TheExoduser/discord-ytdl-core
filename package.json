@@ -1,6 +1,6 @@
 {
     "name": "@distube/ytdl",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A discord-ytdl-core fork. Made for DisTube.js.org",
     "main": "index.js",
     "types": "index.d.ts",
@@ -43,10 +43,10 @@
     "homepage": "https://distube.js.org",
     "dependencies": {
         "prism-media": "^1.2.2",
-        "ytdl-core": "^4.0.3"
+        "ytdl-core": "^4.0.4"
     },
     "devDependencies": {
         "@discordjs/opus": "^0.3.3",
-        "@types/node": "^14.14.6"
+        "@types/node": "^14.14.7"
     }
 }
